@@ -26,9 +26,9 @@ pipeline {
       steps {
         withSonarQubeEnv('SonarQube') {
           sh "mvn sonar:sonar \
-		              -Dsonar.projectKey=numeric \
-		              -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000/ \
-                  -Dsonar.login=79065af579ec0794f42376282b705bbf210fb906"
+		               -Dsonar.projectKey=hallo \
+                   -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 \
+                   -Dsonar.login=96d5975c1d042996404ca2c361bbca3d250bdfc8"
         }
         timeout(time: 5, unit: 'MINUTES') {
           script {
