@@ -22,19 +22,12 @@ pipeline {
       }
     }
 
-    stage('SonarQube - SAST') {
+  stage('SonarQube - SAST') {
       steps {
-          sh "mvn sonar:sonar \
-		               -Dsonar.projectKey=hallo \
-                   -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 \
-                   -Dsonar.login=96d5975c1d042996404ca2c361bbca3d250bdfc8"
-        }
-        timeout(time: 5, unit: 'MINUTES') {
-          script {
-            waitForQualityGate abortPipeline: true
-          }
-        }
+        sh "mvn sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=96d5975c1d042996404ca2c361bbca3d250bdfc8"
       }
+    }
+  
     
 
     //    stage('Vulnerability Scan - Docker ') {
