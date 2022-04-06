@@ -34,12 +34,12 @@ pipeline {
       }
     }
 
- }
   stage('SonarQube - SAST') {
       steps {
 sh "mvn sonar:sonar  -Dsonar.projectKey=test  -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=99de2738accd3c40a0e5e3ac6b2da7e7fc2c6a44"
   }
       }
+ 
 
     stage('Docker Build and Push') {
       steps {
