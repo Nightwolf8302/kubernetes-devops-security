@@ -26,7 +26,7 @@ pipeline {
       steps {
         withSonarQubeEnv('SonarQube') {
           sh "mvn sonar:sonar \
-		              -Dsonar.projectKey=numeric-application \
+		              -Dsonar.projectKey=numeric \
 		              -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000/ \
                   -Dsonar.login=79065af579ec0794f42376282b705bbf210fb906"
         }
