@@ -10,47 +10,51 @@ pipeline {
       }
     }
 
-
-
-    stage('Unit Tests - JUnit and Jacoco') {
+    stage('Unit Tests - JUnit and JaCoCo') {
       steps {
         sh "mvn test"
       }
-      post {
-        always {
-          junit 'target/surefire-reports/*.xml'
-          jacoco execPattern: 'target/jacoco.exec'
-        }
-      }
     }
-      stage('Mutation Tests - PIT') {
+
+    stage('Mutation Tests - PIT') {
       steps {
         sh "mvn org.pitest:pitest-maven:mutationCoverage"
       }
-      post {
-        always {
-          pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
+    }
+
+    stage('SonarQube - SAST') {
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          sh "mvn sonar:sonar \
+		              -Dsonar.projectKey=numeric-application \
+		              -Dsonar.host.url=http://devsecops-demo.eastus.cloudapp.azure.com:9000"
+        }
+        timeout(time: 2, unit: 'MINUTES') {
+          script {
+            waitForQualityGate abortPipeline: true
+          }
         }
       }
     }
 
-  stage('SonarQube - SAST') {
+    //    stage('Vulnerability Scan - Docker ') {
+    //      steps {
+    //         sh "mvn dependency-check:check"   
+    //        }
+    // }
+
+    stage('Vulnerability Scan - Docker') {
       steps {
-sh "mvn sonar:sonar  -Dsonar.projectKey=test  -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=99de2738accd3c40a0e5e3ac6b2da7e7fc2c6a44"
-  }
-      }
- 
-   stage('Vulnerability Scan - Docker ') {
-      steps {
-        sh "mvn dependency-check:check"
-      }
-      post {
-        always {
-          dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
-        }
+        parallel(
+          "Dependency Scan": {
+            sh "mvn dependency-check:check"
+          },
+          "Trivy Scan": {
+            sh "bash trivy-docker-image-scan.sh"
+          }
+        )
       }
     }
-
 
     stage('Docker Build and Push') {
       steps {
@@ -70,8 +74,24 @@ stage('Kubernetes Deployment - DEV') {
         }
       }
     }
-    
+
+  }
+
+  post {
+    always {
+      junit 'target/surefire-reports/*.xml'
+      jacoco execPattern: 'target/jacoco.exec'
+      pitmutation mutationStatsFile: '**/target/pit-reports/**/mutations.xml'
+      dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
+    }
+
+    // success {
+
+    // }
+
+    // failure {
+
+    // }
   }
 
 }
- 
