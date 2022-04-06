@@ -24,7 +24,6 @@ pipeline {
 
     stage('SonarQube - SAST') {
       steps {
-        withSonarQubeEnv('SonarQube') {
           sh "mvn sonar:sonar \
 		               -Dsonar.projectKey=hallo \
                    -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 \
