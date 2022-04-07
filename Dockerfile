@@ -1,8 +1,7 @@
-FROM openjdk:11
+FROM adoptopenjdk/openjdk11:alpine-slim
 EXPOSE 8080
 ARG JAR_FILE=target/*.jar
-RUN sudo useradd -ms /bin/bash k8s-pipeline
-USER k8s-pipeline
-RUN groupadd pipeline && adduser k8s-pipeline pipeline
+RUN addgroup -S pipeline && adduser -S k8s-pipeline -G pipeline
 COPY ${JAR_FILE} /home/k8s-pipeline/app.jar
+USER k8s-pipeline
 ENTRYPOINT ["java","-jar","/home/k8s-pipeline/app.jar"]
