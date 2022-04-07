@@ -24,11 +24,11 @@ pipeline {
 
   stage('SonarQube - SAST') {
       steps {
-        sh "mvn sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=96d5975c1d042996404ca2c361bbca3d250bdfc8"
+        sh "mvn sonar:sonar -Dsonar.projectKey=test -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=18710beb7d97bbd914c1cc4c092dd394bc0fde84"
       }
     }
   
-    
+
 
     //    stage('Vulnerability Scan - Docker ') {
     //      steps {
