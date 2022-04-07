@@ -1,6 +1,15 @@
 pipeline {
   agent any
 
+  environment {
+    deploymentName = "devsecops"
+    containerName = "devsecops-container"
+    serviceName = "devsecops-svc"
+    imageName = "domdockid/test-app:${GIT_COMMIT}"
+    applicationURL = "http://nightwolf.centralus.cloudapp.azure.com:31743/"
+    applicationURI = "/increment/99"
+  }
+
   stages {
 
     stage('Build Artifact - Maven') {
@@ -21,21 +30,22 @@ pipeline {
         sh "mvn org.pitest:pitest-maven:mutationCoverage"
       }
     }
-
-  stage('SonarQube - SAST') {
+/*
+    stage('SonarQube - SAST') {
       steps {
-        sh "mvn sonar:sonar -Dsonar.projectKey=test -Dsonar.host.url=http://nightwolf.centralus.cloudapp.azure.com:9000 -Dsonar.login=18710beb7d97bbd914c1cc4c092dd394bc0fde84"
+        withSonarQubeEnv('SonarQube') {
+          sh "mvn sonar:sonar \
+		              -Dsonar.projectKey=numeric-application \
+		              -Dsonar.host.url=http://devsecops-demo.eastus.cloudapp.azure.com:9000"
+        }
+        timeout(time: 2, unit: 'MINUTES') {
+          script {
+            waitForQualityGate abortPipeline: true
+          }
+        }
       }
     }
-  
-
-
-    //    stage('Vulnerability Scan - Docker ') {
-    //      steps {
-    //         sh "mvn dependency-check:check"   
-    //        }
-    // }
-
+*/
     stage('Vulnerability Scan - Docker') {
       steps {
         parallel(
@@ -54,20 +64,43 @@ pipeline {
 
     stage('Docker Build and Push') {
       steps {
-       withDockerRegistry([credentialsId: "dockerhub", url: ""]) {
+        withDockerRegistry([credentialsId: "docker-hub", url: ""]) {
           sh 'printenv'
-          sh 'sudo docker build -t domdockid/test-app:""$GIT_COMMIT"" .'
-          sh 'docker push domdockid/test-app:""$GIT_COMMIT""'
+          sh 'sudo docker build -t siddharth67/numeric-app:""$GIT_COMMIT"" .'
+          sh 'docker push siddharth67/numeric-app:""$GIT_COMMIT""'
         }
       }
     }
 
-stage('Kubernetes Deployment - DEV') {
+    stage('Vulnerability Scan - Kubernetes') {
       steps {
-        withKubeConfig([credentialsId: 'kubeconfig']) {
-          sh "sed -i 's#replace#domdockid/test-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
-          sh "kubectl apply -f k8s_deployment_service.yaml"
-        }
+        sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
+      }
+    }
+
+    // stage('Kubernetes Deployment - DEV') {
+    //   steps {
+    //     withKubeConfig([credentialsId: 'kubeconfig']) {
+    //       sh "sed -i 's#replace#siddharth67/numeric-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
+    //       sh "kubectl apply -f k8s_deployment_service.yaml"
+    //     }
+    //   }
+    // }
+
+    stage('K8S Deployment - DEV') {
+      steps {
+        parallel(
+          "Deployment": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash k8s-deployment.sh"
+            }
+          },
+          "Rollout Status": {
+            withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "bash k8s-deployment-rollout-status.sh"
+            }
+          }
+        )
       }
     }
 
