@@ -22,6 +22,7 @@ exit_code=$?
  sudo mv zap_report.html owasp-zap-report
 
 
+
 echo "Exit Code : $exit_code"
 
  if [[ ${exit_code} -ne 0 ]];  then
