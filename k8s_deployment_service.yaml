@@ -26,7 +26,7 @@ spec:
         - mountPath: /tmp
           name: vol
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           runAsUser: 100
           readOnlyRootFilesystem: true
 ---
