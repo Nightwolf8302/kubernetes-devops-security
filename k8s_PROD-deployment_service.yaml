@@ -30,7 +30,7 @@ spec:
             drop:
              - NET_RAW
           runAsUser: 100
-          runAsNonRoot: true
+          runAsNonRoot: false
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
         resources:
