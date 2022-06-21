@@ -7,3 +7,4 @@ RUN sudo apt-get upgrade
 ADD ${JAR_FILE} /home/k8s-pipeline/app.jar
 USER k8s-pipeline
 ENTRYPOINT ["java","-jar","/home/k8s-pipeline/app.jar"]
+
