@@ -1,1 +1,1 @@
-<iframe/>
+document.write('Hello, World!');
